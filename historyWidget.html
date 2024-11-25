@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On This Day Widget</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .historyWidget-container {
+            position: relative;
+            width: 500px;
+            height: 280px;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.7);
+        }
+        .historyWidget-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+        }
+        .historyWidget-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 310px;
+            color: white;
+            text-shadow: 0px 0px 5px black, 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .historyWidget-text .historyWidget-date {
+            font-size: 25px;
+            font-weight: bold;
+        }
+        .historyWidget-text .historyWidget-event {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .historyWidget-text .historyWidget-name {
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="historyWidget-container">
+        <img class="historyWidget-image" id="historyWidget-image" src="" alt="Event Image">
+        <div class="historyWidget-text">
+            <div class="historyWidget-date" id="historyWidget-date"></div>
+            <div class="historyWidget-event" id="historyWidget-event"></div>
+            <div class="historyWidget-name" id="historyWidget-name"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadJSON() {
+    try {
+        const response = await fetch('./FromSoftEvents.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to load JSON file:", error);
+        return [];
+    }
+}
+
+
+        function getCurrentDate() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const currentDate = `${month}.${day}`;
+    console.log("Formatted Date for Matching:", currentDate);
+    return currentDate;
+}
+
+
+
+        function getFullDate() {
+            const now = new Date();
+            const options = { month: 'long', day: 'numeric' };
+            return now.toLocaleDateString('en-US', options);
+        }
+
+        async function displayEvent() {
+            const jsonData = await loadJSON();
+            const todayKey = getCurrentDate();
+            const todayEvent = jsonData.find(event => event.date === todayKey);
+
+            if (todayEvent) {
+                document.getElementById("historyWidget-image").src = todayEvent.image;
+                document.getElementById("historyWidget-date").textContent = getFullDate();
+                document.getElementById("historyWidget-event").textContent = todayEvent.event;
+                document.getElementById("historyWidget-name").textContent = todayEvent.name;
+            } else {
+                document.getElementById("historyWidget-date").textContent = "No event found.";
+                document.getElementById("historyWidget-event").textContent = "";
+                document.getElementById("historyWidget-name").textContent = "";
+            }
+        }
+
+        // Call displayEvent on page load
+        displayEvent();
+    </script>
+</body>
+</html>
